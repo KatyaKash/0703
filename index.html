@@ -8,47 +8,66 @@
 <body>
 	<canvas width="500" height="500" id="canvas"></canvas> 
   <script>
-  	var data = [ 100, 68, 20, 30, 100, 50, 80, 45, 110, 97, 65, 70]; 
-    var canvas = document.getElementById('canvas'); 
-    var c = canvas.getContext('2d'); 
-    c.fillStyle ="white";
-    c.fillRect(0,0,500,500);
-    //background
-    var colors = [ "orange", "green", "blue", "yellow", "teal", "red", "pink", "lightyellow", "gray", "violet", "brown", "lightgreen"];
-    var total = 0; 
-	for(var i=0; i<data.length; i++) { 
- 	total += data[i]; 
-	}
+  	window.requestAnimFrame = (function(){ 
+	  	return  window.requestAnimationFrame   || 
+	        window.webkitRequestAnimationFrame || 
+	        window.mozRequestAnimationFrame    || 
+	        window.oRequestAnimationFrame      || 
+	        window.msRequestAnimationFrame     || 
+	        function( callback ){ 
+	            window.setTimeout(callback, 1000 / 60); 
+	          }; 
+	})();
+  	var  canvas = document.getElementById('canvas');
+  	var particles = [];
+  	function loop() {
+  		window.requestAnimFrame(loop);
+  		createParticles();
+  		updateParticles();
+  		killParticles();
+  		drawParticles();
+  	}
+  	window.requestAnimFrame(loop);
 
-	var prevAngle = 0; 
-	for(var i=0; i<data.length; i++) {
-		var fraction = data[i]/total; 
-		var angle = prevAngle+fraction*Math.PI*2;
-		c.fillStyle = colors[i];
+  	function createParticles(){
+  		if (particles.length<100) {
+  			particles.push({
+  				x: Math.random()*canvas.width,
+  				y:0,
+  				speed: 2+Math.random()*3,
+  				radius: 5+Math.random()*5,
+  				color:"white",
+  			});
+  		}
+  	}
+  	function updateParticles() {
+  		for(var i in particles) {
+  			var part = particles[i];
+  			part.y += part.speed;
+  		}
+  	}
+  	function killParticles() {
+  		for(var i in particles) {
+  			var part = particles[i];
+  			if(part.y > canvas.height) {
+  				part.y = 0;
+  			}
+  		}
+  	}
 
-		var grad = c.createRadialGradient( 250,250, 5, 250,250, 90);
-		grad.addColorStop(0,"white"); 
-		grad.addColorStop(1,colors[i]); 
-		c.fillStyle = grad;
-
-		c.beginPath();
-		c.moveTo(250,250);
-		c.arc(250,250,100, prevAngle, angle, false);
-		c.lineTo(250,250);
-		c.fill();
-		c.strokeStyle = "black"; 
-  		c.stroke();
-  		prevAngle = angle;
-	}
-	c.fillStyle = "black"; 
-	c.font = "24pt sans-serif"; 
-	var text = "Sales Data from 2025"; 
-	var metrics = c.measureText(text); 
-	c.fillText(text, 250-metrics.width/2, 400); 
-
-
-
-    
+  	function drawParticles(){
+  		var c = canvas.getContext('2d');
+  		c.fillStyle = "black";
+  		c.fillRect(0,0,canvas.width, canvas.height);
+  		for(var i in particles) {
+  			var part = particles[i];
+  			c.beginPath();
+  			c.arc(part.x,part.y,part.radius,0,Math.PI*2);
+  			c.closePath();
+  			c.fillStyle = part.color;
+  			c.fill();
+  		}
+  	}
   </script> 
 </body>
 </html>
